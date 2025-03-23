@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Interactivo: La Antigua Grecia</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <header>
+    <h1>Quiz Interactivo: La Antigua Grecia</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="quiz.html">Quiz</a></li>
+    </ul>
+  </nav>
+  <main>
+    <section id="quiz-section">
+      <!-- Contenedor de selección de modo de juego -->
+      <div id="mode-selection-container" class="animated fade-in">
+        <h2>Selecciona el modo de juego</h2>
+        <div class="mode-options">
+          <button id="mode-individual">1 Jugador</button>
+          <button id="mode-dual">2 Jugadores</button>
+        </div>
+        <div id="player-names-container" style="display:none; margin-top: 20px;">
+          <label for="player1-name">Nombre del Jugador 1:</label>
+          <input type="text" id="player1-name" placeholder="Jugador 1" required>
+          <br><br>
+          <label for="player2-name">Nombre del Jugador 2:</label>
+          <input type="text" id="player2-name" placeholder="Jugador 2" required>
+        </div>
+        <button id="start-quiz" style="margin-top:20px;">Iniciar Quiz</button>
+      </div>
+
+      <!-- Contenedor del quiz (oculto hasta iniciar) -->
+      <div id="quiz-container" class="animated fade-in" style="display:none;">
+        <div id="question-container">
+          <!-- Aquí se cargarán las preguntas y sus opciones -->
+        </div>
+        <button id="next-btn" style="display:none;">Siguiente</button>
+      </div>
+
+      <!-- Contenedor para mostrar el resultado final -->
+      <div id="result-container" class="animated fade-in" style="display:none;">
+        <h2>Resultado</h2>
+        <div id="score-container">
+          <!-- En modo individual se mostrará un solo puntaje y en modo dos jugadores se presentarán en dos columnas -->
+        </div>
+        <button id="retry-quiz">Reintentar Quiz</button>
+      </div>
+    </section>
+  </main>
+  <script src="js/quiz.js"></script>
+</body>
+</html>
+

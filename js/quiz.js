@@ -1,5 +1,10 @@
 document.addEventListener("DOMContentLoaded", function() {
-  // Variables globales
+  // --------------------------------------------------------------------------
+  // Variable para controlar el bloque de preguntas (siempre inicia en 0 en cada sesión)
+  // --------------------------------------------------------------------------
+  let blockIndex = 0;
+
+  // Variables globales para la lógica del quiz
   let currentQuizQuestions = [];
   let currentQuestionIndex = 0;
   let score = 0;            // Modo individual
@@ -13,11 +18,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let gameMode = "individual"; // Por defecto modo individual
 
-  // Variables para nombres en modo dual
+  // Variables para nombres (se guardan en localStorage)
   let player1Name = "";
   let player2Name = "";
 
-  // Referencias a elementos del DOM para selección de modo
+  // --------------------------------------------------------------------------
+  // Referencias a elementos del DOM para la selección de modo y nombres
+  // --------------------------------------------------------------------------
   const modeSelectionContainer = document.getElementById("mode-selection-container");
   const modeIndividualBtn = document.getElementById("mode-individual");
   const modeDualBtn = document.getElementById("mode-dual");
@@ -26,16 +33,28 @@ document.addEventListener("DOMContentLoaded", function() {
   const player2Input = document.getElementById("player2-name");
   const startQuizBtn = document.getElementById("start-quiz");
 
+  // --------------------------------------------------------------------------
   // Referencias a elementos del DOM para el quiz y resultados
+  // --------------------------------------------------------------------------
   const quizContainer = document.getElementById("quiz-container");
   const questionContainer = document.getElementById("question-container");
   const nextBtn = document.getElementById("next-btn");
   const resultContainer = document.getElementById("result-container");
   const retryQuizBtn = document.getElementById("retry-quiz");
 
-  // -----------------------------------------------------------------------------------
-  // Preguntas del quiz (55 en total, 5 bloques de 11)
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Si existen nombres guardados, se pre-cargan en los inputs
+  // --------------------------------------------------------------------------
+  if (localStorage.getItem("player1Name")) {
+    player1Input.value = localStorage.getItem("player1Name");
+  }
+  if (localStorage.getItem("player2Name")) {
+    player2Input.value = localStorage.getItem("player2Name");
+  }
+
+  // --------------------------------------------------------------------------
+  // Banco de 55 preguntas (5 bloques de 11 preguntas cada uno)
+  // --------------------------------------------------------------------------
   const allQuestions = [
     // --- ORGANIZACIÓN SOCIAL Y POLÍTICA (11) ---
     {
@@ -105,14 +124,14 @@ document.addEventListener("DOMContentLoaded", function() {
         "Mediterraneo, Egeo y Jónico",
         "Atlántico, Pacifico y Artico",
         "Filosofico, Pitufo y Pepa Pig",
-        "Natron, WIFI y Bluetooth"
+        "Android, WIFI y Bluetooth"
       ],
       correctAnswer: 0
     },
     {
       question: "¿Como se clasificaban las personas de mayor a menor importancia?",
       options: [
-        "Ciudadanos, Metecos, Escalvos, Mujeres",
+        "Ciudadanos, Metecos, Esclavos, Mujeres",
         "Policia, Bomberos, Doctores",
         "Lamparas, Dragones, Bromistas",
         "Politicos, Mujeres, Metecos"
@@ -707,27 +726,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   ];
 
-  // -----------------------------------------------------------------------------------
-  // Manejo de bloques (5 bloques de 11 preguntas)
-  // -----------------------------------------------------------------------------------
-  function getQuizBlockIndex() {
-    let index = parseInt(localStorage.getItem("quizBlockIndex"));
-    if (isNaN(index)) {
-      index = 0;
-    }
-    return index;
-  }
-
-  function updateQuizBlockIndex() {
-    let index = getQuizBlockIndex();
-    // Avanzar al siguiente bloque de forma cíclica
-    index = (index + 1) % 5;
-    localStorage.setItem("quizBlockIndex", index);
-  }
-
-  // -----------------------------------------------------------------------------------
-  // Selección de modo
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Selección de modo (igual que antes)
+  // --------------------------------------------------------------------------
   modeIndividualBtn.addEventListener("click", function() {
     gameMode = "individual";
     modeIndividualBtn.classList.add("selected-mode");
@@ -742,9 +743,9 @@ document.addEventListener("DOMContentLoaded", function() {
     playerNamesContainer.style.display = "block";
   });
 
-  // -----------------------------------------------------------------------------------
-  // Botón Iniciar Quiz
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Botón Iniciar Quiz: guardar nombres en localStorage para persistir entre sesiones
+  // --------------------------------------------------------------------------
   startQuizBtn.addEventListener("click", function() {
     if (gameMode === "dual") {
       player1Name = player1Input.value.trim();
@@ -753,15 +754,16 @@ document.addEventListener("DOMContentLoaded", function() {
         alert("Por favor, ingresa los nombres de ambos jugadores.");
         return;
       }
+      localStorage.setItem("player1Name", player1Name);
+      localStorage.setItem("player2Name", player2Name);
     }
     startQuiz();
   });
 
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // Iniciar el quiz
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function startQuiz() {
-    // Reiniciar variables
     score = 0;
     score1 = 0;
     score2 = 0;
@@ -773,8 +775,7 @@ document.addEventListener("DOMContentLoaded", function() {
     currentSelection1 = null;
     currentSelection2 = null;
 
-    // Seleccionar el bloque de 11 preguntas según el índice actual
-    const blockIndex = getQuizBlockIndex();
+    // Seleccionar 11 preguntas según blockIndex
     currentQuizQuestions = allQuestions.slice(blockIndex * 11, blockIndex * 11 + 11);
 
     modeSelectionContainer.style.display = "none";
@@ -783,9 +784,9 @@ document.addEventListener("DOMContentLoaded", function() {
     showQuestion();
   }
 
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // Mostrar la pregunta actual
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function showQuestion() {
     questionContainer.innerHTML = "";
     nextBtn.style.display = "block";
@@ -795,7 +796,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const currentQuestion = currentQuizQuestions[currentQuestionIndex];
     if (!currentQuestion) {
-      // Si no existe la pregunta, es que no hay más datos en este bloque
       alert("No hay más preguntas en este bloque. Verifica que tengas 11 preguntas por bloque.");
       return;
     }
@@ -805,7 +805,6 @@ document.addEventListener("DOMContentLoaded", function() {
     questionContainer.appendChild(questionEl);
 
     if (gameMode === "individual") {
-      // Modo individual
       currentQuestion.options.forEach((option, index) => {
         const optionEl = document.createElement("div");
         optionEl.classList.add("option");
@@ -814,13 +813,12 @@ document.addEventListener("DOMContentLoaded", function() {
         questionContainer.appendChild(optionEl);
       });
     } else {
-      // Modo dual
       const dualContainer = document.createElement("div");
       dualContainer.style.display = "flex";
       dualContainer.style.justifyContent = "space-around";
       dualContainer.style.gap = "20px";
 
-      // Contenedor Jugador 1
+      // Contenedor para Jugador 1
       const player1Container = document.createElement("div");
       player1Container.style.width = "45%";
       const player1Title = document.createElement("h4");
@@ -835,7 +833,7 @@ document.addEventListener("DOMContentLoaded", function() {
         player1Container.appendChild(optionEl);
       });
 
-      // Contenedor Jugador 2
+      // Contenedor para Jugador 2
       const player2Container = document.createElement("div");
       player2Container.style.width = "45%";
       const player2Title = document.createElement("h4");
@@ -856,9 +854,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // Selección en modo individual
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function selectOptionIndividual(selectedEl, selectedIndex) {
     const options = questionContainer.querySelectorAll(".option");
     options.forEach(opt => opt.classList.remove("selected"));
@@ -866,17 +864,14 @@ document.addEventListener("DOMContentLoaded", function() {
     currentSelection = selectedIndex;
   }
 
-  // -----------------------------------------------------------------------------------
-  // Selección en modo dual
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Selección en modo dual (agrega clases específicas para cada jugador)
+  // --------------------------------------------------------------------------
   function selectOptionDual(player, selectedEl, selectedIndex) {
     const container = selectedEl.parentElement;
-    // Quitar las clases de selección previas
     container.querySelectorAll(".option").forEach(opt => {
       opt.classList.remove("selected-player1", "selected-player2");
     });
-  
-    // Asignar la clase según el jugador
     if (player === 1) {
       selectedEl.classList.add("selected-player1");
       currentSelection1 = selectedIndex;
@@ -885,11 +880,10 @@ document.addEventListener("DOMContentLoaded", function() {
       currentSelection2 = selectedIndex;
     }
   }
-  
 
-  // -----------------------------------------------------------------------------------
-  // Botón Siguiente
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Botón Siguiente (para avanzar a la siguiente pregunta)
+  // --------------------------------------------------------------------------
   nextBtn.addEventListener("click", function() {
     const currentQuestion = currentQuizQuestions[currentQuestionIndex];
     if (!currentQuestion) return;
@@ -910,7 +904,6 @@ document.addEventListener("DOMContentLoaded", function() {
       });
       if (isCorrect) score++;
     } else {
-      // Modo dual
       if (currentSelection1 === null || currentSelection2 === null) {
         alert("Por favor, ambos jugadores deben seleccionar una respuesta");
         return;
@@ -943,14 +936,13 @@ document.addEventListener("DOMContentLoaded", function() {
       showQuestion();
     } else {
       showResult();
-      // Cambiamos el bloque de preguntas para la próxima vez
-      updateQuizBlockIndex();
+      // NOTA: Aquí no se modifica blockIndex; lo cambiaremos solo con "Siguiente juego"
     }
   });
 
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // Mostrar resultados finales
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   function showResult() {
     quizContainer.style.display = "none";
     resultContainer.style.display = "block";
@@ -961,7 +953,6 @@ document.addEventListener("DOMContentLoaded", function() {
     resultContainer.appendChild(resultTitle);
 
     if (gameMode === "individual") {
-      // Puntaje y listado de respuestas
       const scoreText = document.createElement("p");
       scoreText.textContent = `Obtuviste ${score} de ${currentQuizQuestions.length} puntos.`;
       resultContainer.appendChild(scoreText);
@@ -986,7 +977,6 @@ document.addEventListener("DOMContentLoaded", function() {
       });
       resultContainer.appendChild(historyList);
     } else {
-      // Modo dual: puntajes y historiales en dos columnas
       const scoreDiv = document.createElement("div");
       scoreDiv.id = "score-container";
       scoreDiv.style.display = "flex";
@@ -1017,7 +1007,6 @@ document.addEventListener("DOMContentLoaded", function() {
       scoreDiv.appendChild(player2ScoreDiv);
       resultContainer.appendChild(scoreDiv);
 
-      // Historial en columnas
       const historyContainer = document.createElement("div");
       historyContainer.style.display = "flex";
       historyContainer.style.justifyContent = "space-around";
@@ -1073,7 +1062,7 @@ document.addEventListener("DOMContentLoaded", function() {
       resultContainer.appendChild(historyContainer);
     }
 
-    // Botón para reintentar el MISMO bloque (opcional)
+    // Botón "Reintentar Quiz" (repite el mismo bloque)
     const retryBtn = document.createElement("button");
     retryBtn.textContent = "Reintentar Quiz";
     retryBtn.addEventListener("click", function() {
@@ -1084,17 +1073,16 @@ document.addEventListener("DOMContentLoaded", function() {
       player2Input.value = "";
       modeIndividualBtn.classList.remove("selected-mode");
       modeDualBtn.classList.remove("selected-mode");
-      // NOTA: Esto NO llama a updateQuizBlockIndex(), así que repite el mismo bloque.
+      // blockIndex no se modifica, se repite el mismo bloque.
     });
     resultContainer.appendChild(retryBtn);
 
-    // Botón para ir al SIGUIENTE juego (nuevo bloque)
+    // Botón "Siguiente juego" (avanza al siguiente bloque)
     const nextGameBtn = document.createElement("button");
     nextGameBtn.textContent = "Siguiente juego";
     nextGameBtn.style.marginLeft = "10px";
     nextGameBtn.addEventListener("click", function() {
-      // Como ya llamamos a updateQuizBlockIndex() al final del quiz,
-      // en este punto el bloque de preguntas ya cambió.
+      blockIndex = (blockIndex + 1) % 5;
       modeSelectionContainer.style.display = "block";
       quizContainer.style.display = "none";
       resultContainer.style.display = "none";
@@ -1106,9 +1094,9 @@ document.addEventListener("DOMContentLoaded", function() {
     resultContainer.appendChild(nextGameBtn);
   }
 
-  // -----------------------------------------------------------------------------------
-  // Reiniciar la UI (este botón existe en quiz.html)
-  // -----------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // Botón para reiniciar la UI (en quiz.html)
+  // --------------------------------------------------------------------------
   retryQuizBtn.addEventListener("click", function() {
     modeSelectionContainer.style.display = "block";
     quizContainer.style.display = "none";
